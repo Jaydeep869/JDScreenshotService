@@ -8,6 +8,7 @@ import { join } from "path";
 import express from "express";
 import { fileURLToPath } from "url";
 import path from "path";
+import puppeteer from "puppeteer";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -73,6 +74,7 @@ async function sscprocess(urls) {
     concurrency: Cluster.CONCURRENCY_CONTEXT,
     // maxConcurrency: 3,//used for max no of browser we can open at a instance
   });
+  
 
   await cluster.task(async ({ page, data: url }) => {
     try {
@@ -100,8 +102,16 @@ async function sscprocess(urls) {
   await cluster.idle();
   //close the headless instance
   await cluster.close();
-  // calling the pdf function
-  // pdf();
+
+  const browser = await puppeteer.launch({
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    headless: true, // Ensure headless mode
+    executablePath: process.env.CHROME_PATH || undefined, // For custom Chrome
+  });
+  const page = await browser.newPage();
+  await page.goto('https://example.com');
+  console.log(await page.title());
+  await browser.close();
 }
 
 app.get('/download-pdf', async (req, res) => {
