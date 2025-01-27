@@ -1,0 +1,23 @@
+{
+  "name": "ts-js-workshop-submission",
+  "version": "1.0.0",
+  "description": "My contribution to workshop",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jaydeep",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.2",
+    "image-to-pdf": "^3.0.2",
+    "nodemon": "^3.1.9",
+    "path": "^0.12.7",
+    "puppeteer": "^24.1.0",
+    "puppeteer-cluster": "^0.24.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
+  },
+  "keywords": []
+}

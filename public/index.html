@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Take Screenshots</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <div class="container flex border">
+        <div class="heading flex border">
+            <h1>Website Screenshot Tool</h1>
+        </div>
+            
+
+        <!-- Form to collect website URLs -->
+        <form id="website-form">
+            <!-- Input for specifying number of websites -->
+            <label for="num-websites">Number of websites:</label>
+            <input type="number" id="num-websites" name="num-websites" min="1" required title="Enter number of websites">
+            
+            <!-- Container where dynamic website URL inputs will be added -->
+            <div id="website-container"></div>
+            
+            <!-- Submit button to process the form -->
+            <a href="http://localhost:8000/save-urls"><button class="design1" type="submit" value="submit">Take Screenshots</button></a>
+            
+        </form>
+    </div>
+    <script src="../index.js"></script>
+</body>
+
+</html>
