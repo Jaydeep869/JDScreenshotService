@@ -3,6 +3,7 @@ import { Cluster } from "puppeteer-cluster";
 import { readdirSync, createWriteStream } from "fs";
 import { promises as fs, existsSync } from "fs";
 import imageToPDF, { sizes } from "image-to-pdf";
+import imageToPdf from 'image-to-pdf';
 import { join } from "path";
 import express from "express";
 import { fileURLToPath } from "url";
@@ -100,37 +101,47 @@ async function sscprocess(urls) {
   //close the headless instance
   await cluster.close();
   // calling the pdf function
-  pdf();
+  // pdf();
 }
 
-// function for creating pdf
-async function pdf() {
+app.get('/download-pdf', async (req, res) => {
   try {
-    pdfname = `screenshot-${timestamp}.pdf`;
-    const pages = readdirSync("./screenshots").map(//getting all the files from the folder
-      (file) => `./screenshots/${file}`//getting the path of the file
-    );
-    //promise for better error handling
-    await new Promise((resolve, reject) => {
-      imageToPDF(pages, sizes.A4) //converting images to pdf
-        .pipe(createWriteStream(pdfname)) //creating a pdf file
-        .on("finish", resolve) //if everything goes right then resolve the promise
-        .on("error", reject); //if there is any error then reject the promise
-    });
+      const screenshots = await fs.readdir(screenshots_folder);
+      const imagePaths = screenshots
+          .filter(file => file.endsWith('.png'))
+          .map(file => join(screenshots_folder, file));
 
-    console.log(`PDF created successfully as ${pdfname}`);
-    return pdfname;
+      if (imagePaths.length === 0) {
+          return res.status(404).send('No screenshots found');
+      }
+
+      const pdfPath = join(screenshots_folder, 'screenshots.pdf');
+      
+      await new Promise((resolve, reject) => {
+          const pdfStream = imageToPdf(imagePaths);
+          const writeStream = createWriteStream(pdfPath);
+          
+          pdfStream.pipe(writeStream)
+              .on('finish', resolve)
+              .on('error', reject);
+      });
+
+      res.download(pdfPath, 'screenshots.pdf', async (err) => {
+          if (err) {
+              console.error('Download error:', err);
+              await unlink(pdfPath).catch(console.error);
+          } else {
+              // Cleanup after successful download
+              await Promise.all([
+                  unlink(pdfPath),
+                  ...imagePaths.map(img => unlink(img))
+              ]).catch(console.error);
+          }
+      });
   } catch (error) {
-    console.error("Error while creating PDF:", error);
-    throw error;
+      console.error('PDF generation error:', error);
+      res.status(500).send('Error generating PDF');
   }
-}
-
-app.get("/download-pdf", (req, res) => {
-  if (!pdfname) {
-    return res.status(404).json({ error: "No PDF available" }); //if there is no pdf file then it will return this error
-  }
-  res.download(pdfname); //if pdf is available then it will download the pdf
 });
 
 app.post("/save-urls", async (req, res) => {
