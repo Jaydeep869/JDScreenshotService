@@ -103,11 +103,15 @@ async function sscprocess(urls) {
   //close the headless instance
   await cluster.close();
 
+  const browserFetcher = puppeteer.createBrowserFetcher({ path: '/tmp/puppeteer-cache' });
+  const revisionInfo = await browserFetcher.download('1095492'); // Default revision for Puppeteer
+
   const browser = await puppeteer.launch({
+    headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    headless: true, // Ensure headless mode
-    executablePath: process.env.CHROME_PATH || undefined, // For custom Chrome
+    executablePath: revisionInfo.executablePath, // Path to the downloaded Chromium
   });
+
   const page = await browser.newPage();
   await page.goto('https://example.com');
   console.log(await page.title());
